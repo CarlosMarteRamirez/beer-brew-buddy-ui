@@ -1,27 +1,22 @@
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Search, Filter } from 'lucide-react';
 import { Beer, Comment, NewComment } from '../types/beer';
-import { beers as initialBeers, comments as initialComments } from '../data/beerData';
+import { comments as initialComments } from '../data/beerData';
 import BeerCard from './BeerCard';
 import BeerModal from './BeerModal';
 
 const BreweryApp = () => {
-  const [beers] = useState<Beer[]>(initialBeers);
+  const [beers, setBeers] = useState<any[]>();
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [selectedBeer, setSelectedBeer] = useState<Beer | null>(null);
+
+  const [beerss, setBeerss] = useState<any>();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStyle, setSelectedStyle] = useState('');
 
   const styles = Array.from(new Set(beers.map(beer => beer.style))).sort();
-
-  const filteredBeers = beers.filter(beer => {
-    const matchesSearch = beer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         beer.brewery.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         beer.style.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStyle = selectedStyle === '' || beer.style === selectedStyle;
-    return matchesSearch && matchesStyle;
-  });
 
   const handleAddComment = (newComment: NewComment) => {
     if (selectedBeer) {
@@ -37,6 +32,27 @@ const BreweryApp = () => {
       console.log('Nuevo comentario agregado:', comment);
     }
   };
+
+  useEffect(() =>
+        {
+          (async () =>
+          {
+            try
+            {
+              const response = await fetch(`${import.meta.env.VITE_Api}api/Beers`);
+
+              if (!response.ok) throw new Error("Error al cargar las cervezas");
+
+              const raw = await response.json();
+
+              setBeers(raw);
+            }
+            catch (error)
+            {
+              console.error(`Error al cargar las provincias: ${error}`);
+            }
+          })();
+        }, []);
 
   return (
     <div className="min-h-screen py-8 px-4">
@@ -70,13 +86,13 @@ const BreweryApp = () => {
         {/* Results count */}
         <div className="mb-6">
           <p className="text-gray-600">
-            Mostrando {filteredBeers.length} de {beers.length} cervezas
+            Mostrando {beers.length} de {beers.length} cervezas
           </p>
         </div>
 
         {/* Beer Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredBeers.map((beer) => (
+          {beers.map((beer) => (
             <BeerCard
               key={beer.id}
               beer={beer}
@@ -85,7 +101,7 @@ const BreweryApp = () => {
           ))}
         </div>
 
-        {filteredBeers.length === 0 && (
+        {beers.length === 0 && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🍺</div>
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
