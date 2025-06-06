@@ -1,0 +1,13 @@
+using MidLevelTest.Models;
+
+namespace MidLevelTest.Services
+{
+    public interface IBeerService
+    {
+        public Task<List<Beer>> GetBeers();
+        public Task<Beer> GetBeer(int id);
+        public Task<Beer> AddBeer(Beer beer);
+        Task UpdateBeer(Beer beer);
+        Task AddReviewToBeer(int beerId, BeerReview review);
+    }
+}

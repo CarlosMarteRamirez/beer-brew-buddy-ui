@@ -1,0 +1,84 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using MidLevelTest.Models;
+using MidLevelTest.Services;
+
+
+namespace MidLevelTest.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class BeersController : ControllerBase
+    {
+        private readonly IBeerService _beerService;
+
+        public BeersController(IBeerService beerService)
+        {
+            _beerService = beerService;
+        }
+
+        // GET: api/beer
+        [HttpGet]
+        public async Task<ActionResult<List<Beer>>> GetAll()
+        {
+            var beers = await _beerService.GetBeers();
+            if (beers == null || !beers.Any())
+                return NotFound("No beers found.");
+            return Ok(beers);
+        }
+
+        // GET: api/beer/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Beer>> GetById(int id)
+        {
+            var beer = await _beerService.GetBeer(id);
+            if (beer == null)
+                return NotFound($"Beer with ID {id} not found.");
+                
+            return Ok(beer);
+        }
+
+        // POST: api/beer
+        [HttpPost]
+        public async Task<ActionResult<Beer>> Create(Beer beer)
+        {
+            var createdBeer = await _beerService.AddBeer(beer);
+            return CreatedAtAction(nameof(GetById), new { id = createdBeer.Id }, createdBeer);
+        }
+        
+        // POST: api/beer/{id}/review
+        [HttpPost("{id}/review")]
+        public async Task<ActionResult<BeerReview>> AddReview(int id, [FromBody] BeerReview review)
+        {
+            var beer = await _beerService.GetBeer(id);
+            if (beer == null)
+                return NotFound($"Beer with ID {id} not found.");
+
+            review.BeerId = id;
+            await _beerService.AddReviewToBeer(id, review);
+
+            // Recalcular el promedio
+            beer = await _beerService.GetBeer(id);
+            if (beer.Reviews.Any())
+            {
+                beer.Rating = beer.Reviews.Average(r => r.Rating);
+                await _beerService.UpdateBeer(beer);
+            }
+
+            return Ok(review);
+        }
+        
+        // GET: api/beer/{id}/reviews
+        [HttpGet("{id}/reviews")]
+        public async Task<ActionResult<List<BeerReview>>> GetReviews(int id)
+        {
+            var beer = await _beerService.GetBeer(id);
+            if (beer == null)
+                return NotFound($"Beer with ID {id} not found.");
+
+            return Ok(beer.Reviews);
+        }
+
+
+    }
+}

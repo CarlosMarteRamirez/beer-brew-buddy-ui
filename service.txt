@@ -1,0 +1,51 @@
+using MidLevelTest.Models;
+using Microsoft.EntityFrameworkCore;
+using MidLevelTest.Data;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace MidLevelTest.Services
+{
+    public class BeerService : IBeerService
+    {
+        private readonly BeerDbContext _context;
+
+        public BeerService(BeerDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<List<Beer>> GetBeers()
+        {
+            return await _context.Beers.ToListAsync();
+        }
+
+        public async Task<Beer> GetBeer(int id)
+        {
+            return await _context.Beers.FindAsync(id);
+        }
+
+        public async Task<Beer> AddBeer(Beer beer)
+        {
+            _context.Beers.Add(beer);
+            await _context.SaveChangesAsync();
+            return beer;
+        }
+        
+        public async Task UpdateBeer(Beer beer)
+        {
+            _context.Beers.Update(beer);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddReviewToBeer(int beerId, BeerReview review)
+        {
+            var beer = await _context.Beers.Include(b => b.Reviews).FirstOrDefaultAsync(b => b.Id == beerId);
+            if (beer == null)
+                throw new Exception("Beer not found");
+
+            beer.Reviews.Add(review);
+            await _context.SaveChangesAsync();
+        }
+    }
+}
