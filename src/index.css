@@ -1,18 +1,7 @@
 
-@import "tailwindcss";
-
-@theme {
-  --color-beer-gold: #d4af37;
-  --color-beer-amber: #ffbf00;
-  --color-beer-dark: #8b4513;
-  --color-foam: #f5f5dc;
-  --color-copper: #b87333;
-  
-  --font-family-beer: 'Inter', sans-serif;
-  
-  --shadow-beer: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-beer-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
   * {
@@ -21,13 +10,13 @@
 
   body {
     @apply bg-gradient-to-br from-amber-50 to-orange-100 text-slate-900;
-    font-family: var(--font-family-beer);
+    font-family: 'Inter', sans-serif;
   }
 }
 
-@layer utilities {
+@layer components {
   .beer-card {
-    @apply bg-white rounded-xl shadow-beer border border-amber-200 hover:shadow-beer-lg transition-all duration-300;
+    @apply bg-white rounded-xl shadow-lg border border-amber-200 hover:shadow-xl transition-all duration-300;
   }
   
   .beer-rating {
